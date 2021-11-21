@@ -1,6 +1,4 @@
 const User = require('../models/user');
-const NotFound = require('../errors/NotFound');
-const IncorrectData = require('../errors/IncorrectData');
 
 function getUsers(req, res, next) {
   return User.find({})
@@ -18,21 +16,27 @@ function getUsers(req, res, next) {
     .catch(next);
 }
 
-function getUserById(req, res, next) {
+const getUserById = (req, res) => {
   const { userId: _id } = req.params;
   return User.findById({ _id })
+    .orFail(() => {
+      throw new Error('404');
+    })
     .then((user) => {
-      res
-        .status(200)
-        .send(user);
+      res.status(200).send(user);
     })
-    .catch(() => {
-      throw new NotFound('Пользователь не найден.');
-    })
-    .catch(next);
-}
+    .catch((err) => {
+      if (err.message === '404') {
+        return res.status(404).send({ message: 'Пользователь не найден.' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Нет пользователя с таким id. Некоректные данные.' });
+      }
+      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
+    });
+};
 
-function createUser(req, res, next) {
+function createUser(req, res) {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => {
@@ -40,13 +44,15 @@ function createUser(req, res, next) {
         .status(201)
         .send({ user });
     })
-    .catch(() => {
-      throw new IncorrectData('Переданы некорректные данные.');
-    })
-    .catch(next);
+    .catch((err) => {
+      res.status(400)
+        .send({
+          message: `Переданы некорректные данные. Ошибка: ${err.message}`,
+        });
+    });
 }
 
-function updateUser(req, res, next) {
+function updateUser(req, res) {
   const ownId = req.user._id;
   const { name, about } = req.body;
   User.findByIdAndUpdate((ownId), { name, about }, { new: true })
@@ -55,20 +61,30 @@ function updateUser(req, res, next) {
         .status(200)
         .send(user);
     })
-    .catch(() => {
-      throw new IncorrectData('Переданы некорректные данные.');
-    })
-    .catch(next);
+    .catch((err) => {
+      if (err.message === '404') {
+        return res.status(404).send({ message: 'Пользователь не найден.' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Нет пользователя с таким id. Некоректные данные.' });
+      }
+      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
+    });
 }
 
-function updateAvatar(req, res, next) {
+function updateAvatar(req, res) {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
     .then((user) => res.send({ user }))
-    .catch(() => {
-      throw new IncorrectData('Переданы некорректные данные.');
-    })
-    .catch(next);
+    .catch((err) => {
+      if (err.message === '404') {
+        return res.status(404).send({ message: 'Пользователь не найден.' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Нет пользователя с таким id. Некоректные данные.' });
+      }
+      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
+    });
 }
 
 module.exports = {

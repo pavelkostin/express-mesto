@@ -1,15 +1,15 @@
 {
   "name": "mesto-13-project-work",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "`/routes` — папка с файлами роутера `/controllers` — папка с файлами контроллеров пользователя и карточки `/models` — папка с файлами описания схем пользователя и карточки",
+  "main": "app.js",
   "scripts": {
     "lint": "npx eslint .",
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Kostin Pavel",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^8.2.0",
@@ -17,6 +17,7 @@
     "eslint-plugin-import": "^2.25.3"
   },
   "dependencies": {
+    "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "mongoose": "^6.0.12"
   }

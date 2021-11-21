@@ -1,6 +1,4 @@
 const Card = require('../models/card');
-const NotFound = require('../errors/NotFound');
-const IncorrectData = require('../errors/IncorrectData');
 
 function getCards(req, res) {
   return Card.find({})
@@ -9,20 +7,25 @@ function getCards(req, res) {
         .status(200)
         .send(cards);
     })
-    .catch(() => {
-      throw new NotFound('Карточки не найдены.');
+    .catch((err) => {
+      if (err.message === '404') {
+        return res.status(404).send({ message: 'Карточки не найдены.' });
+      }
+      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
     });
 }
 
-function createCard(req, res, next) {
+function createCard(req, res) {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => res.send({ data: card }))
-    .catch(() => {
-      throw new IncorrectData('Переданы некорректные данные.');
-    })
-    .catch(next);
+    .catch((err) => {
+      if (err.message === '404') {
+        return res.status(404).send({ message: 'Переданы некорректные данные.' });
+      }
+      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
+    });
 }
 
 function deleteCard(req, res) {
@@ -33,8 +36,14 @@ function deleteCard(req, res) {
         .status(200)
         .send(card);
     })
-    .catch(() => {
-      throw new IncorrectData('Переданы некорректные данные.');
+    .catch((err) => {
+      if (err.message === '404') {
+        return res.status(404).send({ message: 'Карточка не найдена.' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Нет карточки с таким id. Некоректные данные.' });
+      }
+      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
     });
 }
 
@@ -47,8 +56,14 @@ function likeCard(req, res) {
         .status(200)
         .send(card);
     })
-    .catch(() => {
-      throw new IncorrectData('Переданы некорректные данные.');
+    .catch((err) => {
+      if (err.message === '404') {
+        return res.status(404).send({ message: 'Карточка не найдена.' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Нет карточки с таким id. Некоректные данные.' });
+      }
+      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
     });
 }
 
@@ -61,8 +76,14 @@ function disLikeCard(req, res) {
         .status(200)
         .send(card);
     })
-    .catch(() => {
-      throw new IncorrectData('Переданы некорректные данные.');
+    .catch((err) => {
+      if (err.message === '404') {
+        return res.status(404).send({ message: 'Карточка не найдена.' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Нет карточки с таким id. Некоректные данные.' });
+      }
+      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
     });
 }
 
