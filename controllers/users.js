@@ -1,6 +1,6 @@
 const User = require('../models/user');
 
-function getUsers(req, res, next) {
+function getUsers(req, res) {
   return User.find({})
     .then((users) => {
       res
@@ -8,12 +8,11 @@ function getUsers(req, res, next) {
         .send(users);
     })
     .catch((err) => {
-      res.status(500)
-        .send({
-          message: `Ошибка: ${err.message}`,
-        });
-    })
-    .catch(next);
+      if (err.message === '404') {
+        return res.status(404).send({ message: 'Пользователи не найдены.' });
+      }
+      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
+    });
 }
 
 const getUserById = (req, res) => {
@@ -45,10 +44,10 @@ function createUser(req, res) {
         .send({ user });
     })
     .catch((err) => {
-      res.status(400)
-        .send({
-          message: `Переданы некорректные данные. Ошибка: ${err.message}`,
-        });
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Переданы некоректные данные.' });
+      }
+      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
     });
 }
 
