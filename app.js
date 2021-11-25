@@ -18,12 +18,17 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 app.use(express.json());
 app.use((req, res, next) => {
   req.user = {
-    _id: '619a21e7cb971945a2fa08d0',
+    _id: '619e73afcd3958342eb4aa0f',
   };
   next();
 });
 app.use(routes);
-app.use("*", (req, res, next) => next(new Error("Ресурс не найден.")));
+
+const notFound = (req, res, next) => {
+  res.send({ message: 'Ресурс не найден.' });
+  next();
+};
+app.use('*', notFound);
 
 app.listen(port, () => {
   console.log(`MESTO-13 app listening at http://localhost:${port}`);
