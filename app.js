@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 app.use(routes);
 
 const notFound = (req, res, next) => {
-  res.send({ message: 'Ресурс не найден.' });
+  res.status(404).send({ message: 'Ресурс не найден.' });
   next();
 };
 app.use('*', notFound);

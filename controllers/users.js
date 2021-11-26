@@ -24,9 +24,10 @@ const getUserById = (req, res) => {
     .catch((err) => {
       if (err.message === 'NotFound') {
         res.status(404).send({ message: `Пользователь по ID: ${_id} не найден.` });
-      } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка.' });
+      } else if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Передан несуществующий ID пользователя.' });
       }
+      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
     });
 };
 

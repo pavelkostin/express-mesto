@@ -38,7 +38,9 @@ function deleteCard(req, res) {
     })
     .catch((err) => {
       if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'Карточка не найдена.' });
+        res.status(404).send({ message: `Карточка c _id:${_id} не найдена.` });
+      } else if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Передан несуществующий _id карточки.' });
       }
       return res.status(500).send({ message: 'На сервере произошла ошибка.' });
     });
@@ -70,9 +72,6 @@ function disLikeCard(req, res) {
   const { cardId: _id } = req.params;
   const ownId = req.user._id;
   Card.findByIdAndUpdate({ _id }, { $pull: { likes: ownId } }, { new: true })
-    .orFail(() => {
-      throw new Error('NotFound');
-    })
     .orFail(() => {
       throw new Error('NotFound');
     })
