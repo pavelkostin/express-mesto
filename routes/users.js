@@ -8,6 +8,7 @@ const { getMyProfile } = require('../controllers/users');
 const regExp = require('../regexp/regexp');
 
 router.get('/', getUsers);
+router.get('/me', getMyProfile);
 
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
@@ -21,8 +22,6 @@ router.patch('/me', celebrate({
     about: Joi.string().required().min(2).max(30),
   }),
 }), updateUser);
-
-router.get('/me', getMyProfile);
 
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({

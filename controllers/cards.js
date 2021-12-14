@@ -1,34 +1,35 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/notFoundError');
 const BadRequestError = require('../errors/badRequestError');
+const ForbiddenError = require('../errors/forbiddenError');
 
-function getCards(req, res) {
+function getCards(req, res, next) {
   Card.find({})
     .then((cards) => {
       res
         .status(200)
         .send(cards);
     })
-    .catch(() => {
-      res.status(500).send({ message: 'На сервере произошла ошибка.' });
+    .catch((err) => {
+      next(err);
     });
 }
 
-function createCard(req, res) {
+function createCard(req, res, next) {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => res.send({ card }))
     .catch((err) => {
       if (err.name === 'ValidationError') throw new BadRequestError('Переданы некорректные данные.');
-      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
+      next(err);
     });
 }
 
 function deleteCard(req, res, next) {
   return Card.findById(req.params.cardId)
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFoundError(`Карточка по ID: ${req.params.cardId} не найдена.`);
     })
     .then((card) => {
       if (card.owner.toString() === req.user._id.toString()) {
@@ -37,15 +38,11 @@ function deleteCard(req, res, next) {
           .status(200)
           .send(card);
       } else {
-        res
-          .status(403)
-          .send({ message: `Карточку c _id: ${req.params.cardId} создал другой пользователь.` });
+        next(new ForbiddenError(`Карточку c _id: ${req.params.cardId} создал другой пользователь. Нельзя удалять чужие карточки.`));
       }
     })
     .catch((err) => {
-      if (err.message === 'NotFound') {
-        next(new NotFoundError(`Карточка по ID: ${req.params.cardId} не найдена.`));
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Передан несуществующий ID карточки.'));
       } else {
         next(err);

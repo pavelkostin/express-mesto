@@ -5,22 +5,22 @@ const NotFoundError = require('../errors/notFoundError');
 const BadRequestError = require('../errors/badRequestError');
 const ConflictError = require('../errors/conflictError');
 
-function getUsers(req, res) {
+function getUsers(req, res, next) {
   return User.find({})
     .then((users) => {
       res
         .status(200)
         .send(users);
     })
-    .catch(() => {
-      res.status(500).send({ message: 'На сервере произошла ошибка.' });
+    .catch((err) => {
+      next(err);
     });
 }
 
-function getMyProfile(req, res) {
-  User.findById(req.params.userId)
+function getMyProfile(req, res, next) {
+  User.findById(req.user._id)
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFoundError('Пользователь не найден.');
     })
     .then((user) => {
       res
@@ -28,14 +28,16 @@ function getMyProfile(req, res) {
         .send(user);
     })
     .catch((err) => {
-      if (err.message === 'NotFound') throw new NotFoundError('Пользователь с указанным _id не найден.');
-      if (err.name === 'ValidationError') throw new BadRequestError('Переданы некорректные данные.');
-      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Переданы некорректные данные.'));
+      } else {
+        next(err);
+      }
     });
 }
 
 const getUserById = (req, res, next) => {
-  User.findById(req.user._id)
+  User.findById(req.params.userId)
     .orFail(() => {
       throw new Error('NotFound');
     })
@@ -53,33 +55,34 @@ const getUserById = (req, res, next) => {
     });
 };
 
-function createUser(req, res) {
+function createUser(req, res, next) {
   const {
     name, about, avatar, email, password,
   } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).send({ message: 'Переданы некорректные данные.' });
-  }
 
   return User.findOne({ email })
     .then((user) => {
       if (user) {
         throw new ConflictError('Вы пытаетесь зарегистрироваться по уже существующему в базе email.');
       }
-      bcrypt.hash(password, 10);
+      return bcrypt.hash(password, 10);
     })
     .then((hash) => {
       User.create({
         name, about, avatar, email, password: hash,
       })
-        .then((user) => res.status(200).send({ email, id: user._id }))
-        .catch((err) => res.status(500).send({ message: err.message }));
+        .then((user) => res.status(200).send({ email, id: user._id }));
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные.'));
+      } else {
+        next(err);
+      }
+    });
 }
 
-function updateUser(req, res) {
+function updateUser(req, res, next) {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -91,7 +94,7 @@ function updateUser(req, res) {
     },
   )
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFoundError('Пользователь не найден.');
     })
     .then((user) => {
       res
@@ -99,17 +102,19 @@ function updateUser(req, res) {
         .send({ data: user });
     })
     .catch((err) => {
-      if (err.message === 'NotFound') throw new NotFoundError('Пользователь с указанным _id не найден.');
-      if (err.name === 'ValidationError') throw new BadRequestError('Переданы некорректные данные.');
-      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные.'));
+      } else {
+        next(err);
+      }
     });
 }
 
-function updateAvatar(req, res) {
+function updateAvatar(req, res, next) {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { runValidators: true, new: true })
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFoundError('Пользователь не найден.');
     })
     .then((user) => {
       res
@@ -117,9 +122,11 @@ function updateAvatar(req, res) {
         .send(user);
     })
     .catch((err) => {
-      if (err.message === 'NotFound') throw new NotFoundError('Пользователь с указанным _id не найден.');
-      if (err.name === 'ValidationError') throw new BadRequestError('Переданы некорректные данные.');
-      return res.status(500).send({ message: 'На сервере произошла ошибка.' });
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные.'));
+      } else {
+        next(err);
+      }
     });
 }
 
