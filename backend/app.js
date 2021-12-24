@@ -48,5 +48,5 @@ app.use(errors());
 app.use(errorHandler);
 
 app.listen(port, () => {
-  console.log(`MESTO-13 app listening at http://localhost:${port}`);
+  console.log(`MESTO-13 app listening on port:${port}`);
 });
