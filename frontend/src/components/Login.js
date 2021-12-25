@@ -26,7 +26,7 @@ export function Login({authorization, loggedIn, login }) {
 
     return (
         <>
-            <Header to='/sign-up' loggedIn={loggedIn} login={login} placeholder='Регистрация'></Header>
+            <Header to='/signup' loggedIn={loggedIn} login={login} placeholder='Регистрация'></Header>
             <section className='auth'>
                 <h2 className='auth__header'>Вход</h2>
                 <form className='auth__form' onSubmit={handleSubmit}>

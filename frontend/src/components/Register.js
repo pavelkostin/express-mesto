@@ -26,17 +26,16 @@ function Register({ registration, loggedIn, login }) {
 
     return (
         <>
-            <Header to='/sign-in' loggedIn={loggedIn} login={login} placeholder='Вход'></Header>
+            <Header to='/signin' loggedIn={loggedIn} login={login} placeholder='Вход'></Header>
             <section className='auth'>
                 <h2 className='auth__header'>Регистрация</h2>
                 <form className='auth__form' onSubmit={handleSubmit}>
                     <input className='auth__input' type='text' placeholder='E-mail' value={email} onChange={handleChangeEmail}></input>
                     <input className='auth__input' type='password' placeholder='Пароль' value={password} onChange={handleChangePassword}></input>
                     <button className='auth__submit'>Зарегистрироваться</button>
-                    <NavLink to="/sign-in" className="auth__link">Уже зарегистрированы? Войти</NavLink>
+                    <NavLink to="/signin" className="auth__link">Уже зарегистрированы? Войти</NavLink>
                 </form>
             </section>
-            
         </>
     )
 }

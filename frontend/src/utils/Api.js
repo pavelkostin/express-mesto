@@ -80,32 +80,8 @@ class Api {
             headers: this._headers
         })
         .then(this._checkResponse)
-
     }
 
-/*     likeCard(card) {
-        return fetch(`${this._url}/cards/likes/${card._cardId}`, {
-            method: 'PUT',
-            headers: this._headers
-        })
-            .then(this._checkResponse)
-    }
-
-    disLikeCard(card) {
-        return fetch(`${this._url}/cards/likes/${card._cardId}`, {
-            method: 'DELETE',
-            headers: this._headers
-        })
-            .then(this._checkResponse)
-    } */
-
-
-/*     getCountsOfLikes(card) {
-        return fetch(`${this._url}/cards/likes/${card._id}`, {
-            headers: this._headers
-        })
-            .then(this._checkResponse)
-    } */
 
     editAvatar({avatar}) {
         return fetch(`${this._url}/users/me/avatar`, {
@@ -116,20 +92,11 @@ class Api {
             })
         }).then(this._checkResponse);
     }
-
 }
 
 
-/* export const newApi = new Api({
-    url: "https://nomoreparties.co/v1/cohort-22",
-    headers: {
-        authorization: "1ee4b4ce-cc80-4da8-ae23-ade464e5dd65",
-        "Content-Type": "application/json",
-    },
-}); */
-
 export const newApi = new Api({
-    url: "http://shatura-mesto.students.nomoredomains.rocks",
+    url: "http://api.shatura.students.nomoredomains.rocks/",
     headers: {
         authorization: "1ee4b4ce-cc80-4da8-ae23-ade464e5dd65",
         "Content-Type": "application/json",
