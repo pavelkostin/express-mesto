@@ -1,7 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const { celebrate, Joi, errors } = require('celebrate');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { allowedCors } = require('./utils/utils');
 const routes = require('./routes');
 const { login } = require('./controllers/users');
 const { createUser } = require('./controllers/users');
@@ -23,6 +25,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 app.use(express.json());
+app.use(cors(allowedCors));
 
 app.use(requestLogger);
 app.use('/signup', celebrate({
