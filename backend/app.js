@@ -25,7 +25,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 app.use(express.json());
-app.use(cors(allowedCors));
+/* app.use(cors(allowedCors)); */
 
 app.use(requestLogger);
 app.use('/signup', celebrate({
